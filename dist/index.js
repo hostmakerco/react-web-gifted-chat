@@ -1655,23 +1655,23 @@ function (_React$Component) {
       var _this = this;
 
       return React__default.createElement("textarea", Object.assign({
-        testID: this.props.placeholder,
-        accessible: true,
+        //testID={this.props.placeholder}
+        //accessible
         onKeyDown: function onKeyDown(e) {
           return _this.onKeyDown(e);
-        },
-        accessibilityLabel: this.props.placeholder,
-        placeholder: this.props.placeholder,
-        placeholderTextColor: this.props.placeholderTextColor,
-        multiline: this.props.multiline,
+        } //accessibilityLabel={this.props.placeholder}
+        ,
+        placeholder: this.props.placeholder //placeholderTextColor={this.props.placeholderTextColor}
+        //multiline={this.props.multiline}
+        ,
         onChange: function onChange(event) {
           return _this.onChangeText(event.target.value);
         },
         style: _objectSpread({}, styles$a.textInput, this.props.textInputStyle),
-        value: this.props.text,
-        enablesReturnKeyAutomatically: true,
-        underlineColorAndroid: "transparent",
-        keyboardAppearance: this.props.keyboardAppearance
+        value: this.props.text //enablesReturnKeyAutomatically
+        //underlineColorAndroid="transparent"
+        //keyboardAppearance={this.props.keyboardAppearance}
+
       }, this.props.textInputProps));
     }
   }]);
