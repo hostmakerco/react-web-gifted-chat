@@ -2769,12 +2769,9 @@ function (_React$Component) {
         this.resetInputToolbar();
       }
 
-      this.props.onSend(messages);
-      setTimeout(function () {
-        if (_this3.getIsMounted() === true) {
-          _this3.scrollToBottom();
-        }
-      }, 500);
+      if (this.props.onSend) {
+        this.props.onSend(messages);
+      }
 
       if (shouldResetInputToolbar === true) {
         setTimeout(function () {

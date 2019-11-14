@@ -47,6 +47,17 @@ class App extends Component {
     }
   }
 
+  isCloseToTop({ layoutMeasurement, contentOffset, contentSize }) {
+    console.log("isCloseToTop")
+    
+    const paddingToTop = 80;
+    return contentSize.height - layoutMeasurement.height - paddingToTop <= contentOffset.y;
+  }
+
+  loadMoreMessage() {
+    console.log("loadmore message")
+  }
+
   renderInputToolbar = (props) => {
     // Here you will return your custom InputToolbar.js file you copied before and include with your stylings, edits.
     return (
@@ -61,11 +72,16 @@ class App extends Component {
         Converstions
         </div>
         <div style={styles.chat}>
-          <GiftedChat user={{id: 1,}}
-                      messages={this.state.messages}
-                      renderInputToolbar={this.renderInputToolbar} 
-                      showScrollBottom={true}
-                      onSend={this.onSend}/>
+          <GiftedChat 
+            user={{id: 1,}}
+            messages={this.state.messages}
+            renderInputToolbar={this.renderInputToolbar} 
+            showScrollBottom={true}
+            listViewProps={{
+              scrollEventThrottle: 400,
+              onScroll: ({ nativeEvent }) => { if (this.isCloseToTop(nativeEvent)) this.loadMoreMessage(); }
+            }}
+            onSend={this.onSend}/>
           </div>
         <div style={styles.converationDetails}>
         Conversation details
