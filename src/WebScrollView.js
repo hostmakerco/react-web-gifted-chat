@@ -17,9 +17,11 @@ export default class WebScrollView extends Component {
     }
     return (
       <div style={styles.container}>
-        {ListHeaderComponent()}
-        {messages.map(this.renderItem)}
-        {ListFooterComponent()}
+        <div style={styles.innerContainer}>
+          {ListHeaderComponent()}
+          {messages.map(this.renderItem)}
+          {ListFooterComponent()}
+        </div>
       </div>
     );
   }
@@ -31,6 +33,9 @@ const styles = {
     minHeight: '100%',
     width: '100%',
     overflow: 'auto',
+  },
+  innerContainer: {
+    width: '100%',
     display: 'flex',
     flexDirection: 'column-reverse',
     flex: 1,
