@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {GiftedChat} from 'react-web-gifted-chat'
+import {GiftedChat, InputToolbar, Composer} from 'react-web-gifted-chat'
 
 const loremIpsum ='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum';
 
@@ -47,6 +47,13 @@ class App extends Component {
     }
   }
 
+  renderInputToolbar = (props) => {
+    // Here you will return your custom InputToolbar.js file you copied before and include with your stylings, edits.
+    return (
+      <InputToolbar {...props} containerStyle={{ height: 40 }} renderComposer={props1 => ( <Composer {...props1} textInputStyle={{ height: 31 }} /> )} />
+    )
+  }
+
   render() {
     return (
       <div className="App" style={styles.container}>
@@ -56,6 +63,7 @@ class App extends Component {
         <div style={styles.chat}>
           <GiftedChat user={{id: 1,}}
                       messages={this.state.messages}
+                      renderInputToolbar={this.renderInputToolbar} 
                       onSend={this.onSend}/>
           </div>
         <div style={styles.converationDetails}>

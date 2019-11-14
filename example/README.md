@@ -1,5 +1,20 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Test Module Locally Before Publishing
+
+Always test it locally before publishing the npm module. 
+
+### `cd <react-web-gifted-chat folder>`
+### `npm link`
+### `cd <react-web-gifted-chat/example folder>`
+### `npm link react-web-gifted-chat`
+### `npm start`
+After changing source codes in react-web-gifted-chat/src, run:
+### `npm run compile`
+The example will automatically refresh itself. <br>
+Make sure react-web-gifted-chat is under devDependencies in package.json
+
+
 ## Available Scripts
 
 In the project directory, you can run:

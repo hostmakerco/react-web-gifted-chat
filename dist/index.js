@@ -2224,7 +2224,9 @@ function (_Component) {
 
       return React__default.createElement("div", {
         style: styles$g.container
-      }, ListHeaderComponent(), messages.map(this.renderItem), ListFooterComponent());
+      }, React__default.createElement("div", {
+        style: styles$g.innerContainer
+      }, ListHeaderComponent(), messages.map(this.renderItem), ListFooterComponent()));
     }
   }]);
 
@@ -2235,7 +2237,10 @@ var styles$g = {
     height: '100%',
     minHeight: '100%',
     width: '100%',
-    overflow: 'auto',
+    overflow: 'auto'
+  },
+  innerContainer: {
+    width: '100%',
     display: 'flex',
     flexDirection: 'column-reverse',
     flex: 1,
