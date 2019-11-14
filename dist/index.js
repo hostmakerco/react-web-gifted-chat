@@ -2184,18 +2184,12 @@ var WebScrollView =
 function (_Component) {
   _inherits(WebScrollView, _Component);
 
-  function WebScrollView() {
-    var _getPrototypeOf2;
-
+  function WebScrollView(props) {
     var _this;
 
     _classCallCheck(this, WebScrollView);
 
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(WebScrollView)).call.apply(_getPrototypeOf2, [this].concat(args)));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(WebScrollView).call(this, props));
 
     _this.renderItem = function (item, index) {
       var renderItem = _this.props.renderItem;
@@ -2205,17 +2199,56 @@ function (_Component) {
       });
     };
 
+    _this.innerContainer = React__default.createRef();
+    _this.outerContainer = React__default.createRef();
+    _this.requesting = false;
+    _this.handleScroll = _this.handleScroll.bind(_assertThisInitialized(_assertThisInitialized(_this)));
     return _this;
   }
 
   _createClass(WebScrollView, [{
+    key: "handleScroll",
+    value: function handleScroll() {
+      var _this$props = this.props,
+          showScrollToBottom = _this$props.showScrollToBottom,
+          hideScrollToBottom = _this$props.hideScrollToBottom;
+      var node = this.outerContainer.current;
+
+      if (!this.requesting && node.scrollTop < 100) {
+        console.log("request now"); //this.requesting = true;
+      }
+
+      if (node.scrollHeight - node.scrollTop - node.clientHeight > 300) {
+        if (showScrollToBottom) {
+          showScrollToBottom();
+        }
+      } else {
+        if (hideScrollToBottom) {
+          hideScrollToBottom();
+        }
+      }
+    }
+  }, {
+    key: "scrollToBottom",
+    value: function scrollToBottom() {
+      this.innerContainer.current.scrollIntoView(false);
+    }
+  }, {
+    key: "scrollTo",
+    value: function scrollTo(options) {
+      this.outerContainer.current.scrollTo({
+        offset: 0,
+        animated: 'true'
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this$props = this.props,
-          ListHeaderComponent = _this$props.ListHeaderComponent,
-          ListFooterComponent = _this$props.ListFooterComponent,
-          data = _this$props.data,
-          inverted = _this$props.inverted;
+      var _this$props2 = this.props,
+          ListHeaderComponent = _this$props2.ListHeaderComponent,
+          ListFooterComponent = _this$props2.ListFooterComponent,
+          data = _this$props2.data,
+          inverted = _this$props2.inverted;
       var messages = data;
 
       if (!inverted) {
@@ -2223,9 +2256,12 @@ function (_Component) {
       }
 
       return React__default.createElement("div", {
-        style: styles$g.container
+        style: styles$g.outerContainer,
+        onScroll: this.handleScroll,
+        ref: this.outerContainer
       }, React__default.createElement("div", {
-        style: styles$g.innerContainer
+        style: styles$g.innerContainer,
+        ref: this.innerContainer
       }, ListHeaderComponent(), messages.map(this.renderItem), ListFooterComponent()));
     }
   }]);
@@ -2233,7 +2269,7 @@ function (_Component) {
   return WebScrollView;
 }(React.Component);
 var styles$g = {
-  container: {
+  outerContainer: {
     height: '100%',
     minHeight: '100%',
     width: '100%',
@@ -2250,6 +2286,8 @@ var styles$g = {
 WebScrollView.defaultProps = {
   data: [],
   extraData: {},
+  showScrollToBottom: function showScrollToBottom() {},
+  hideScrollToBottom: function hideScrollToBottom() {},
   ListHeaderComponent: function ListHeaderComponent() {},
   ListFooterComponent: function ListFooterComponent() {},
   inverted: false
@@ -2260,18 +2298,12 @@ var MessageContainer =
 function (_React$PureComponent) {
   _inherits(MessageContainer, _React$PureComponent);
 
-  function MessageContainer() {
-    var _getPrototypeOf2;
-
+  function MessageContainer(props) {
     var _this;
 
     _classCallCheck(this, MessageContainer);
 
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(MessageContainer)).call.apply(_getPrototypeOf2, [this].concat(args)));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(MessageContainer).call(this, props));
     _this.state = {
       showScrollBottom: false,
       imageMessages: []
@@ -2301,11 +2333,25 @@ function (_React$PureComponent) {
       return null;
     };
 
-    _this.scrollToBottom = function () {
-      _this.scrollTo({
-        offset: 0,
-        animated: 'true'
+    _this.showScrollToBottom = function () {
+      _this.setState({
+        showScrollBottom: true
       });
+    };
+
+    _this.hideScrollToBottom = function () {
+      _this.setState({
+        showScrollBottom: false
+      });
+    };
+
+    _this.scrollToBottom = function () {
+      //this.scrollTo({ offset: 0, animated: 'true' });
+      if (_this.flatListRef === null) {
+        return;
+      }
+
+      _this.flatListRef.scrollToBottom();
     };
 
     _this.renderRow = function (_ref) {
@@ -2358,12 +2404,19 @@ function (_React$PureComponent) {
       return "".concat(item.id);
     };
 
+    _this.flatListRef = React__default.createRef();
     return _this;
   }
 
   _createClass(MessageContainer, [{
     key: "scrollTo",
-    value: function scrollTo(options) {// this._invertibleScrollViewRef.scrollTo(options);
+    value: function scrollTo(options) {
+      // this._invertibleScrollViewRef.scrollTo(options);
+      if (this.flatListRef === null) {
+        return;
+      }
+
+      this.flatListRef.scrollTo(options);
     }
   }, {
     key: "renderScrollToBottomWrapper",
@@ -2378,7 +2431,7 @@ function (_React$PureComponent) {
           right: 5,
           bottom: 5
         }
-      }, React__default.createElement(ReactNative.Text, null, "V")));
+      }, React__default.createElement(ReactNative.Text, null, "\u25BC")));
 
       if (this.props.scrollToBottomComponent) {
         return React__default.createElement(TouchableOpacity, {
@@ -2397,6 +2450,8 @@ function (_React$PureComponent) {
   }, {
     key: "render",
     value: function render() {
+      var _this2 = this;
+
       if (this.props.messages.length === 0) {
         return React__default.createElement(ReactNative.View, {
           style: styles$h.container
@@ -2409,8 +2464,10 @@ function (_React$PureComponent) {
         },
         onLayout: function onLayout() {// this.flatListRef.current.scrollTo({x: 0, y: 0, animated: true});
         }
-      }, this.state.showScrollBottom && this.props.scrollToBottom ? this.renderScrollToBottomWrapper() : null, React__default.createElement(WebScrollView, {
-        ref: this.flatListRef,
+      }, this.state.showScrollBottom && this.props.showScrollBottom ? this.renderScrollToBottomWrapper() : null, React__default.createElement(WebScrollView, {
+        ref: function ref(component) {
+          return _this2.flatListRef = component;
+        },
         keyExtractor: this.keyExtractor,
         extraData: this.props.extraData,
         enableEmptySections: true,
@@ -2421,7 +2478,9 @@ function (_React$PureComponent) {
         contentContainerStyle: styles$h.contentContainerStyle,
         renderItem: this.renderRow,
         ListFooterComponent: this.renderHeaderWrapper,
-        ListHeaderComponent: this.renderFooter
+        ListHeaderComponent: this.renderFooter,
+        showScrollToBottom: this.showScrollToBottom,
+        hideScrollToBottom: this.hideScrollToBottom
       }));
     }
   }], [{
@@ -2453,7 +2512,7 @@ var styles$h = ReactNative.StyleSheet.create({
     flex: 1
   },
   scrollToBottomStyle: {
-    opacity: 0.8,
+    opacity: 1,
     position: 'absolute',
     paddingHorizontal: 15,
     paddingVertical: 8,
@@ -2463,7 +2522,7 @@ var styles$h = ReactNative.StyleSheet.create({
     height: 40,
     width: 40,
     borderRadius: 20,
-    backgroundColor: Color.white,
+    backgroundColor: '#ddd',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: Color.black,
@@ -2486,6 +2545,7 @@ MessageContainer.defaultProps = {
   listViewProps: {},
   invertibleScrollViewProps: {},
   extraData: null,
+  showScrollBottom: false,
   scrollToBottom: false,
   scrollToBottomOffset: 200
 };
@@ -2652,16 +2712,19 @@ function (_React$Component) {
   }, {
     key: "scrollToBottom",
     value: function scrollToBottom() {
-      var animated = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
       if (this._messageContainerRef === null) {
         return;
       }
-
+      /*
       this._messageContainerRef.scrollTo({
         y: 0,
-        animated: animated
+        animated,
       });
+      */
+
+
+      this._messageContainerRef.scrollToBottom();
     }
   }, {
     key: "renderMessages",
@@ -2707,7 +2770,11 @@ function (_React$Component) {
       }
 
       this.props.onSend(messages);
-      this.scrollToBottom();
+      setTimeout(function () {
+        if (_this3.getIsMounted() === true) {
+          _this3.scrollToBottom();
+        }
+      }, 500);
 
       if (shouldResetInputToolbar === true) {
         setTimeout(function () {
@@ -2931,6 +2998,7 @@ GiftedChat.defaultProps = {
   forceGetKeyboardHeight: false,
   inverted: true,
   extraData: null,
+  showScrollBottom: false,
   minComposerHeight: MIN_COMPOSER_HEIGHT,
   maxComposerHeight: MAX_COMPOSER_HEIGHT
 };

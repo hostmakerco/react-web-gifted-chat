@@ -19,6 +19,11 @@ import WebScrollView from './WebScrollView';
 import TouchableOpacity from './TouchableOpacity';
 
 export default class MessageContainer extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.flatListRef = React.createRef();
+  }
+
   state = {
     showScrollBottom: false,
     imageMessages: [],
@@ -57,11 +62,30 @@ export default class MessageContainer extends React.PureComponent {
 
   scrollTo(options) {
     // this._invertibleScrollViewRef.scrollTo(options);
+
+    if (this.flatListRef === null) {
+      return;
+    }
+
+    this.flatListRef.scrollTo(options);
   }
 
+  showScrollToBottom = () => {
+    this.setState({ showScrollBottom: true });
+  }
+
+  hideScrollToBottom = () => {
+    this.setState({ showScrollBottom: false });
+  }
 
   scrollToBottom = () => {
-    this.scrollTo({ offset: 0, animated: 'true' });
+    //this.scrollTo({ offset: 0, animated: 'true' });
+
+    if (this.flatListRef === null) {
+      return;
+    }
+
+    this.flatListRef.scrollToBottom();
   }
 
   renderRow = ({ item, index }) => {
@@ -101,7 +125,7 @@ export default class MessageContainer extends React.PureComponent {
     const scrollToBottomComponent = (
       <View style={styles.scrollToBottomStyle}>
         <TouchableOpacity onPress={this.scrollToBottom} hitSlop={{ top: 5, left: 5, right: 5, bottom: 5 }}>
-          <Text>V</Text>
+          <Text>▼</Text>
         </TouchableOpacity>
       </View>
     );
@@ -129,9 +153,9 @@ export default class MessageContainer extends React.PureComponent {
         }
       }
       >
-        {this.state.showScrollBottom && this.props.scrollToBottom ? this.renderScrollToBottomWrapper() : null}
+        {this.state.showScrollBottom && this.props.showScrollBottom ? this.renderScrollToBottomWrapper() : null}
         <WebScrollView
-          ref={this.flatListRef}
+          ref={component => this.flatListRef = component}
           keyExtractor={this.keyExtractor}
           extraData={this.props.extraData}
           enableEmptySections
@@ -143,6 +167,8 @@ export default class MessageContainer extends React.PureComponent {
           renderItem={this.renderRow}
           ListFooterComponent={this.renderHeaderWrapper}
           ListHeaderComponent={this.renderFooter}
+          showScrollToBottom={this.showScrollToBottom}
+          hideScrollToBottom={this.hideScrollToBottom}
         />
       </View>
     );
@@ -163,7 +189,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollToBottomStyle: {
-    opacity: 0.8,
+    opacity: 1,
     position: 'absolute',
     paddingHorizontal: 15,
     paddingVertical: 8,
@@ -173,7 +199,7 @@ const styles = StyleSheet.create({
     height: 40,
     width: 40,
     borderRadius: 20,
-    backgroundColor: Color.white,
+    backgroundColor: '#ddd',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: Color.black,
@@ -194,6 +220,7 @@ MessageContainer.defaultProps = {
   listViewProps: {},
   invertibleScrollViewProps: {},
   extraData: null,
+  showScrollBottom: false,
   scrollToBottom: false,
   scrollToBottomOffset: 200,
 };
@@ -210,6 +237,7 @@ MessageContainer.propTypes = {
   loadEarlier: PropTypes.bool,
   invertibleScrollViewProps: PropTypes.object,
   extraData: PropTypes.object,
+  showScrollBottom: PropTypes.bool,
   scrollToBottom: PropTypes.bool,
   scrollToBottomOffset: PropTypes.number,
   scrollToBottomComponent: PropTypes.func,

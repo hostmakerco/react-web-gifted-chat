@@ -39,6 +39,7 @@ import {
 } from './Constant';
 
 class GiftedChat extends React.Component {
+
   constructor(props) {
     super(props);
 
@@ -183,10 +184,14 @@ class GiftedChat extends React.Component {
     if (this._messageContainerRef === null) {
       return;
     }
+    /*
     this._messageContainerRef.scrollTo({
       y: 0,
       animated,
     });
+    */
+
+    this._messageContainerRef.scrollToBottom();
   }
 
 
@@ -225,7 +230,12 @@ class GiftedChat extends React.Component {
     }
 
     this.props.onSend(messages);
-    this.scrollToBottom();
+
+    setTimeout(() => {
+      if (this.getIsMounted() === true) {
+        this.scrollToBottom();
+      }
+    }, 500);
 
     if (shouldResetInputToolbar === true) {
       setTimeout(() => {
@@ -406,6 +416,7 @@ GiftedChat.defaultProps = {
   forceGetKeyboardHeight: false,
   inverted: true,
   extraData: null,
+  showScrollBottom: false,
   minComposerHeight: MIN_COMPOSER_HEIGHT,
   maxComposerHeight: MAX_COMPOSER_HEIGHT,
 };
@@ -461,6 +472,7 @@ GiftedChat.propTypes = {
   inverted: PropTypes.bool,
   textInputProps: PropTypes.object,
   extraData: PropTypes.object,
+  showScrollBottom: PropTypes.bool,
   minComposerHeight: PropTypes.number,
   maxComposerHeight: PropTypes.number,
 };

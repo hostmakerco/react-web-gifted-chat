@@ -64,6 +64,7 @@ class App extends Component {
           <GiftedChat user={{id: 1,}}
                       messages={this.state.messages}
                       renderInputToolbar={this.renderInputToolbar} 
+                      showScrollBottom={true}
                       onSend={this.onSend}/>
           </div>
         <div style={styles.converationDetails}>
