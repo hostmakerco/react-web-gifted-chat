@@ -2237,7 +2237,7 @@ function (_Component) {
           inverted = _this$props.inverted;
       var messages = data;
 
-      if (!inverted) {
+      if (inverted) {
         messages = data.slice().reverse();
       }
 
@@ -2617,7 +2617,6 @@ function (_React$Component) {
     };
     _this.onSend = _this.onSend.bind(_assertThisInitialized(_assertThisInitialized(_this)));
     _this.getLocale = _this.getLocale.bind(_assertThisInitialized(_assertThisInitialized(_this)));
-    _this.onInputSizeChanged = _this.onInputSizeChanged.bind(_assertThisInitialized(_assertThisInitialized(_this)));
     _this.onInputTextChanged = _this.onInputTextChanged.bind(_assertThisInitialized(_assertThisInitialized(_this)));
     _this.onMainViewLayout = _this.onMainViewLayout.bind(_assertThisInitialized(_assertThisInitialized(_this)));
     _this.onInitialLayoutViewLayout = _this.onInitialLayoutViewLayout.bind(_assertThisInitialized(_assertThisInitialized(_this)));
@@ -2648,7 +2647,7 @@ function (_React$Component) {
       this.setMessages(messages || []);
       this.setTextFromProp(text);
 
-      if (inverted === true) {
+      if (inverted) {
         setTimeout(function () {
           return _this2.scrollToBottom(false);
         }, 200);
@@ -2670,11 +2669,7 @@ function (_React$Component) {
           text = _this$props2.text,
           inverted = _this$props2.inverted;
 
-      if (this.props !== prevProps) {
-        this.setMessages(messages || []);
-      }
-
-      if (inverted === true && messages && prevProps.messages && messages.length !== prevProps.messages.length) {
+      if (inverted && messages && prevProps.messages && messages.length !== prevProps.messages.length) {
         setTimeout(function () {
           return _this3.scrollToBottom(false);
         }, 200);
@@ -2684,14 +2679,6 @@ function (_React$Component) {
         this.setTextFromProp(text);
       }
     }
-    /*
-    componentWillReceiveProps(nextProps = {}) {
-      const { messages, text } = nextProps;
-      this.setMessages(messages || []);
-      this.setTextFromProp(text);
-    }
-    */
-
   }, {
     key: "initLocale",
     value: function initLocale() {
@@ -2794,8 +2781,7 @@ function (_React$Component) {
         invertibleScrollViewProps: this.invertibleScrollViewProps,
         messages: this.getMessages(),
         ref: this._messageContainerRef,
-        onScroll: this.handleOnScroll //ref={component => this._messageContainerRef = component}
-
+        onScroll: this.handleOnScroll
       })), this.renderChatFooter());
     }
   }, {
@@ -2851,9 +2837,6 @@ function (_React$Component) {
       }
     }
   }, {
-    key: "onInputSizeChanged",
-    value: function onInputSizeChanged(size) {}
-  }, {
     key: "onInputTextChanged",
     value: function onInputTextChanged(text) {
       if (this.getIsTypingDisabled()) {
@@ -2905,7 +2888,6 @@ function (_React$Component) {
         text: this.getTextFromProp(this.state.text),
         composerHeight: this.state.composerHeight,
         onSend: this.onSend,
-        onInputSizeChanged: this.onInputSizeChanged,
         onTextChanged: this.onInputTextChanged,
         textInputProps: _objectSpread({}, this.props.textInputProps, {
           ref: function ref(textInput) {
@@ -2945,6 +2927,11 @@ function (_React$Component) {
     key: "render",
     value: function render() {
       if (this.state.isInitialized === true) {
+        var _this$props3 = this.props,
+            messages = _this$props3.messages,
+            text = _this$props3.text;
+        this.setMessages(messages || []);
+        this.setTextFromProp(text);
         return React__default.createElement(ReactNative.View, {
           style: styles$i.container,
           onLayout: this.onMainViewLayout

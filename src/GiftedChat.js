@@ -61,7 +61,6 @@ class GiftedChat extends React.Component {
 
     this.onSend = this.onSend.bind(this);
     this.getLocale = this.getLocale.bind(this);
-    this.onInputSizeChanged = this.onInputSizeChanged.bind(this);
     this.onInputTextChanged = this.onInputTextChanged.bind(this);
     this.onMainViewLayout = this.onMainViewLayout.bind(this);
     this.onInitialLayoutViewLayout = this.onInitialLayoutViewLayout.bind(this);
@@ -98,8 +97,8 @@ class GiftedChat extends React.Component {
     this.setMessages(messages || []);
     this.setTextFromProp(text);
 
-    if (inverted === true) {
-      setTimeout(() => this.scrollToBottom(false), 200)
+    if (inverted) {
+      setTimeout(() => this.scrollToBottom(false), 200);
     }
   }
 
@@ -110,31 +109,19 @@ class GiftedChat extends React.Component {
   componentDidUpdate(prevProps: any = {}) {
     const { messages, text, inverted } = this.props;
 
-    if (this.props !== prevProps) {
-      this.setMessages(messages || []);
-    }
-
     if (
-      inverted === true &&
-      messages &&
-      prevProps.messages &&
-      messages.length !== prevProps.messages.length
+      inverted
+      && messages
+      && prevProps.messages
+      && messages.length !== prevProps.messages.length
     ) {
-      setTimeout(() => this.scrollToBottom(false), 200)
+      setTimeout(() => this.scrollToBottom(false), 200);
     }
 
     if (text !== prevProps.text) {
-      this.setTextFromProp(text)
+      this.setTextFromProp(text);
     }
   }
-
-  /*
-  componentWillReceiveProps(nextProps = {}) {
-    const { messages, text } = nextProps;
-    this.setMessages(messages || []);
-    this.setTextFromProp(text);
-  }
-  */
 
   initLocale() {
     if (this.props.locale === null || moment.locales().indexOf(this.props.locale) === -1) {
@@ -243,7 +230,6 @@ class GiftedChat extends React.Component {
           messages={this.getMessages()}
           ref={this._messageContainerRef}
           onScroll={this.handleOnScroll}
-          //ref={component => this._messageContainerRef = component}
         />
         {this.renderChatFooter()}
       </div>
@@ -292,9 +278,6 @@ class GiftedChat extends React.Component {
     }
   }
 
-  onInputSizeChanged(size) {
-  }
-
   onInputTextChanged(text) {
     if (this.getIsTypingDisabled()) {
       return;
@@ -335,7 +318,6 @@ class GiftedChat extends React.Component {
       text: this.getTextFromProp(this.state.text),
       composerHeight: this.state.composerHeight,
       onSend: this.onSend,
-      onInputSizeChanged: this.onInputSizeChanged,
       onTextChanged: this.onInputTextChanged,
       textInputProps: {
         ...this.props.textInputProps,
@@ -372,6 +354,10 @@ class GiftedChat extends React.Component {
 
   render() {
     if (this.state.isInitialized === true) {
+      const { messages, text } = this.props;
+      this.setMessages(messages || []);
+      this.setTextFromProp(text);
+
       return (
         <View style={styles.container} onLayout={this.onMainViewLayout}>
           {this.renderMessages()}
