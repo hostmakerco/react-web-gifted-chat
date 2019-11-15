@@ -1969,11 +1969,7 @@ function (_React$Component) {
         }, this.props.label);
       }
 
-      return React__default.createElement(ReactNative.View, null, React__default.createElement(ReactNative.Text, {
-        style: [styles$e.text, this.props.textStyle, {
-          opacity: 0
-        }]
-      }, this.props.label), React__default.createElement(ReactNative.ActivityIndicator, {
+      return React__default.createElement(ReactNative.View, null, React__default.createElement(ReactNative.ActivityIndicator, {
         color: "white",
         size: "small",
         style: [styles$e.activityIndicator, this.props.activityIndicatorStyle]
@@ -1984,15 +1980,14 @@ function (_React$Component) {
     value: function render() {
       var _this = this;
 
-      return React__default.createElement(ReactNative.TouchableOpacity, {
+      return React__default.createElement(ReactNative.View, {
         style: [styles$e.container, this.props.containerStyle],
-        onPress: function onPress() {
+        onClick: function onClick() {
           if (_this.props.onLoadEarlier) {
             _this.props.onLoadEarlier();
           }
-        },
-        disabled: this.props.isLoadingEarlier === true,
-        accessibilityTraits: "button"
+        } //disabled={this.props.isLoadingEarlier === true}
+
       }, React__default.createElement(ReactNative.View, {
         style: [styles$e.wrapper, this.props.wrapperStyle]
       }, this.renderLoading()));
@@ -2191,6 +2186,13 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(WebScrollView).call(this, props));
 
+    _this.scrollToEnd = function () {
+
+      if (_this.innerContainer && _this.innerContainer.current) {
+        _this.innerContainer.current.scrollIntoView(false);
+      }
+    };
+
     _this.renderItem = function (item, index) {
       var renderItem = _this.props.renderItem;
       return renderItem({
@@ -2201,7 +2203,6 @@ function (_Component) {
 
     _this.innerContainer = React__default.createRef();
     _this.outerContainer = React__default.createRef();
-    _this.requesting = false;
     _this.handleScroll = _this.handleScroll.bind(_assertThisInitialized(_assertThisInitialized(_this)));
     return _this;
   }
@@ -2209,46 +2210,31 @@ function (_Component) {
   _createClass(WebScrollView, [{
     key: "handleScroll",
     value: function handleScroll() {
-      var _this$props = this.props,
-          showScrollToBottom = _this$props.showScrollToBottom,
-          hideScrollToBottom = _this$props.hideScrollToBottom;
+      var onScroll = this.props.onScroll;
       var node = this.outerContainer.current;
 
-      if (!this.requesting && node.scrollTop < 100) {
-        console.log("request now"); //this.requesting = true;
-      }
-
-      if (node.scrollHeight - node.scrollTop - node.clientHeight > 300) {
-        if (showScrollToBottom) {
-          showScrollToBottom();
-        }
-      } else {
-        if (hideScrollToBottom) {
-          hideScrollToBottom();
-        }
+      if (onScroll) {
+        onScroll(node);
       }
     }
   }, {
-    key: "scrollToBottom",
-    value: function scrollToBottom() {
-      this.innerContainer.current.scrollIntoView(false);
-    }
-  }, {
-    key: "scrollTo",
-    value: function scrollTo(options) {
-      this.outerContainer.current.scrollTo({
-        offset: 0,
-        animated: 'true'
-      });
+    key: "scrollToOffset",
+    value: function scrollToOffset(options) {
+      console.log('Not implemented');
+      /*
+      if (this.innerContainer && this.innerContainer.current && options) {
+        this.innerContainer.current.scrollToOffset(options);
+      }
+      */
     }
   }, {
     key: "render",
     value: function render() {
-      var _this$props2 = this.props,
-          ListHeaderComponent = _this$props2.ListHeaderComponent,
-          ListFooterComponent = _this$props2.ListFooterComponent,
-          data = _this$props2.data,
-          inverted = _this$props2.inverted;
+      var _this$props = this.props,
+          ListHeaderComponent = _this$props.ListHeaderComponent,
+          ListFooterComponent = _this$props.ListFooterComponent,
+          data = _this$props.data,
+          inverted = _this$props.inverted;
       var messages = data;
 
       if (!inverted) {
@@ -2286,8 +2272,7 @@ var styles$g = {
 WebScrollView.defaultProps = {
   data: [],
   extraData: {},
-  showScrollToBottom: function showScrollToBottom() {},
-  hideScrollToBottom: function hideScrollToBottom() {},
+  onScroll: function onScroll() {},
   ListHeaderComponent: function ListHeaderComponent() {},
   ListFooterComponent: function ListFooterComponent() {},
   inverted: false
@@ -2333,25 +2318,56 @@ function (_React$PureComponent) {
       return null;
     };
 
-    _this.showScrollToBottom = function () {
-      _this.setState({
-        showScrollBottom: true
-      });
-    };
-
-    _this.hideScrollToBottom = function () {
-      _this.setState({
-        showScrollBottom: false
-      });
-    };
-
     _this.scrollToBottom = function () {
-      //this.scrollTo({ offset: 0, animated: 'true' });
-      if (_this.flatListRef === null) {
-        return;
+      var animated = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+      var inverted = _this.props.inverted;
+
+      if (!inverted) {
+        _this.scrollTo({
+          offset: 0,
+          animated: animated
+        });
+      } else {
+        if (_this.scrollViewRef && _this.scrollViewRef.current) {
+          _this.scrollViewRef.current.scrollToEnd({
+            animated: animated
+          });
+        }
+      }
+    };
+
+    _this.handleOnScroll = function (node) {
+      var _this$props = _this.props,
+          scrollToBottomOffset = _this$props.scrollToBottomOffset,
+          onScroll = _this$props.onScroll;
+
+      if (onScroll) {
+        onScroll(node);
       }
 
-      _this.flatListRef.scrollToBottom();
+      var contentOffsetY = node.scrollHeight - node.scrollTop - node.clientHeight;
+
+      if (_this.props.inverted) {
+        if (contentOffsetY > scrollToBottomOffset) {
+          _this.setState({
+            showScrollBottom: true
+          });
+        } else {
+          _this.setState({
+            showScrollBottom: false
+          });
+        }
+      } else {
+        if (contentOffsetY < scrollToBottomOffset && contentSizeHeight - layoutMeasurementHeight > scrollToBottomOffset) {
+          _this.setState({
+            showScrollBottom: true
+          });
+        } else {
+          _this.setState({
+            showScrollBottom: false
+          });
+        }
+      }
     };
 
     _this.renderRow = function (_ref) {
@@ -2370,9 +2386,9 @@ function (_React$PureComponent) {
         item.user = {};
       }
 
-      var _this$props = _this.props,
-          messages = _this$props.messages,
-          restProps = _objectWithoutProperties(_this$props, ["messages"]);
+      var _this$props2 = _this.props,
+          messages = _this$props2.messages,
+          restProps = _objectWithoutProperties(_this$props2, ["messages"]);
 
       var previousMessage = messages[index + 1] || {};
       var nextMessage = messages[index - 1] || {};
@@ -2404,19 +2420,16 @@ function (_React$PureComponent) {
       return "".concat(item.id);
     };
 
-    _this.flatListRef = React__default.createRef();
+    _this.scrollViewRef = React__default.createRef();
     return _this;
   }
 
   _createClass(MessageContainer, [{
-    key: "scrollTo",
-    value: function scrollTo(options) {
-      // this._invertibleScrollViewRef.scrollTo(options);
-      if (this.flatListRef === null) {
-        return;
+    key: "scrollToOffset",
+    value: function scrollToOffset(options) {
+      if (this.scrollViewRef && this.scrollViewRef.current && options) {
+        this.scrollViewRef.current.scrollToOffset(options);
       }
-
-      this.flatListRef.scrollTo(options);
     }
   }, {
     key: "renderScrollToBottomWrapper",
@@ -2450,8 +2463,6 @@ function (_React$PureComponent) {
   }, {
     key: "render",
     value: function render() {
-      var _this2 = this;
-
       if (this.props.messages.length === 0) {
         return React__default.createElement(ReactNative.View, {
           style: styles$h.container
@@ -2464,10 +2475,9 @@ function (_React$PureComponent) {
         },
         onLayout: function onLayout() {// this.flatListRef.current.scrollTo({x: 0, y: 0, animated: true});
         }
-      }, this.state.showScrollBottom && this.props.showScrollBottom ? this.renderScrollToBottomWrapper() : null, React__default.createElement(WebScrollView, {
-        ref: function ref(component) {
-          return _this2.flatListRef = component;
-        },
+      }, this.state.showScrollBottom && this.props.showScrollBottom ? this.renderScrollToBottomWrapper() : null, React__default.createElement(WebScrollView //ref={component => this.flatListRef = component}
+      , {
+        ref: this.scrollViewRef,
         keyExtractor: this.keyExtractor,
         extraData: this.props.extraData,
         enableEmptySections: true,
@@ -2479,8 +2489,8 @@ function (_React$PureComponent) {
         renderItem: this.renderRow,
         ListFooterComponent: this.renderHeaderWrapper,
         ListHeaderComponent: this.renderFooter,
-        showScrollToBottom: this.showScrollToBottom,
-        hideScrollToBottom: this.hideScrollToBottom
+        onScroll: this.handleOnScroll //{...this.props.listViewProps}
+
       }));
     }
   }], [{
@@ -2540,6 +2550,7 @@ MessageContainer.defaultProps = {
   renderFooter: null,
   renderMessage: null,
   onLoadEarlier: function onLoadEarlier() {},
+  onScroll: function onScroll() {},
   inverted: true,
   loadEarlier: false,
   listViewProps: {},
@@ -2547,7 +2558,8 @@ MessageContainer.defaultProps = {
   extraData: null,
   showScrollBottom: false,
   scrollToBottom: false,
-  scrollToBottomOffset: 200
+  scrollToBottomOffset: 200,
+  forwardRef: null
 };
 
 var GiftedChat =
@@ -2562,6 +2574,34 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(GiftedChat).call(this, props)); // default values
 
+    _this.scrollToBottom = function () {
+      var animated = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
+      if (_this._messageContainerRef && _this._messageContainerRef.current) {
+        var inverted = _this.props.inverted;
+
+        if (inverted) {
+          _this._messageContainerRef.current.scrollToBottom({
+            animated: animated
+          });
+        } else {
+          _this._messageContainerRef.current.scrollToOffset({
+            offset: 0,
+            animated: animated
+          });
+        }
+      }
+    };
+
+    _this.handleOnScroll = function (node) {
+      var onScroll = _this.props.onScroll;
+
+      if (onScroll) {
+        onScroll(node);
+      }
+    };
+
+    _this._messageContainerRef = React__default.createRef();
     _this._isMounted = false;
     _this._keyboardHeight = 0;
     _this._bottomOffset = 0;
@@ -2595,15 +2635,24 @@ function (_React$Component) {
       };
     }
   }, {
-    key: "componentWillMount",
-    value: function componentWillMount() {
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var _this2 = this;
+
       var _this$props = this.props,
           messages = _this$props.messages,
-          text = _this$props.text;
+          text = _this$props.text,
+          inverted = _this$props.inverted;
       this.setIsMounted(true);
       this.initLocale();
       this.setMessages(messages || []);
       this.setTextFromProp(text);
+
+      if (inverted === true) {
+        setTimeout(function () {
+          return _this2.scrollToBottom(false);
+        }, 200);
+      }
     }
   }, {
     key: "componentWillUnmount",
@@ -2611,14 +2660,38 @@ function (_React$Component) {
       this.setIsMounted(false);
     }
   }, {
-    key: "componentWillReceiveProps",
-    value: function componentWillReceiveProps() {
-      var nextProps = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      var messages = nextProps.messages,
-          text = nextProps.text;
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {
+      var _this3 = this;
+
+      var prevProps = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _this$props2 = this.props,
+          messages = _this$props2.messages,
+          text = _this$props2.text,
+          inverted = _this$props2.inverted;
+
+      if (this.props !== prevProps) {
+        this.setMessages(messages || []);
+      }
+
+      if (inverted === true && messages && prevProps.messages && messages.length !== prevProps.messages.length) {
+        setTimeout(function () {
+          return _this3.scrollToBottom(false);
+        }, 200);
+      }
+
+      if (text !== prevProps.text) {
+        this.setTextFromProp(text);
+      }
+    }
+    /*
+    componentWillReceiveProps(nextProps = {}) {
+      const { messages, text } = nextProps;
       this.setMessages(messages || []);
       this.setTextFromProp(text);
     }
+    */
+
   }, {
     key: "initLocale",
     value: function initLocale() {
@@ -2710,27 +2783,8 @@ function (_React$Component) {
       return this._isMounted;
     }
   }, {
-    key: "scrollToBottom",
-    value: function scrollToBottom() {
-
-      if (this._messageContainerRef === null) {
-        return;
-      }
-      /*
-      this._messageContainerRef.scrollTo({
-        y: 0,
-        animated,
-      });
-      */
-
-
-      this._messageContainerRef.scrollToBottom();
-    }
-  }, {
     key: "renderMessages",
     value: function renderMessages() {
-      var _this2 = this;
-
       return React__default.createElement("div", {
         style: {
           height: "calc(100% - ".concat(this.state.composerHeight, "px)"),
@@ -2739,15 +2793,15 @@ function (_React$Component) {
       }, React__default.createElement(MessageContainer, Object.assign({}, this.props, {
         invertibleScrollViewProps: this.invertibleScrollViewProps,
         messages: this.getMessages(),
-        ref: function ref(component) {
-          return _this2._messageContainerRef = component;
-        }
+        ref: this._messageContainerRef,
+        onScroll: this.handleOnScroll //ref={component => this._messageContainerRef = component}
+
       })), this.renderChatFooter());
     }
   }, {
     key: "onSend",
     value: function onSend() {
-      var _this3 = this;
+      var _this4 = this;
 
       var messages = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
       var shouldResetInputToolbar = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -2758,9 +2812,9 @@ function (_React$Component) {
 
       messages = messages.map(function (message) {
         return _objectSpread({}, message, {
-          user: _this3.props.user,
+          user: _this4.props.user,
           createdAt: new Date(),
-          id: _this3.props.messageIdGenerator()
+          id: _this4.props.messageIdGenerator()
         });
       });
 
@@ -2775,8 +2829,8 @@ function (_React$Component) {
 
       if (shouldResetInputToolbar === true) {
         setTimeout(function () {
-          if (_this3.getIsMounted() === true) {
-            _this3.setIsTypingDisabled(false);
+          if (_this4.getIsMounted() === true) {
+            _this4.setIsTypingDisabled(false);
           }
         }, 100);
       }
@@ -2845,7 +2899,7 @@ function (_React$Component) {
   }, {
     key: "renderInputToolbar",
     value: function renderInputToolbar() {
-      var _this4 = this;
+      var _this5 = this;
 
       var inputToolbarProps = _objectSpread({}, this.props, {
         text: this.getTextFromProp(this.state.text),
@@ -2855,7 +2909,7 @@ function (_React$Component) {
         onTextChanged: this.onInputTextChanged,
         textInputProps: _objectSpread({}, this.props.textInputProps, {
           ref: function ref(textInput) {
-            return _this4.textInput = textInput;
+            return _this5.textInput = textInput;
           },
           maxLength: this.getIsTypingDisabled() ? 0 : this.props.maxInputLength
         })
@@ -2951,6 +3005,7 @@ GiftedChat.defaultProps = {
   },
   user: {},
   onSend: function onSend() {},
+  onScroll: function onScroll() {},
   locale: null,
   timeFormat: TIME_FORMAT,
   dateFormat: DATE_FORMAT,

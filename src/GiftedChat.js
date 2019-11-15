@@ -44,6 +44,7 @@ class GiftedChat extends React.Component {
     super(props);
 
     // default values
+    this._messageContainerRef = React.createRef();
     this._isMounted = false;
     this._keyboardHeight = 0;
     this._bottomOffset = 0;
@@ -90,23 +91,50 @@ class GiftedChat extends React.Component {
     };
   }
 
-  componentWillMount() {
-    const { messages, text } = this.props;
+  componentDidMount() {
+    const { messages, text, inverted } = this.props;
     this.setIsMounted(true);
     this.initLocale();
     this.setMessages(messages || []);
     this.setTextFromProp(text);
+
+    if (inverted === true) {
+      setTimeout(() => this.scrollToBottom(false), 200)
+    }
   }
 
   componentWillUnmount() {
     this.setIsMounted(false);
   }
 
+  componentDidUpdate(prevProps: any = {}) {
+    const { messages, text, inverted } = this.props;
+
+    if (this.props !== prevProps) {
+      this.setMessages(messages || []);
+    }
+
+    if (
+      inverted === true &&
+      messages &&
+      prevProps.messages &&
+      messages.length !== prevProps.messages.length
+    ) {
+      setTimeout(() => this.scrollToBottom(false), 200)
+    }
+
+    if (text !== prevProps.text) {
+      this.setTextFromProp(text)
+    }
+  }
+
+  /*
   componentWillReceiveProps(nextProps = {}) {
     const { messages, text } = nextProps;
     this.setMessages(messages || []);
     this.setTextFromProp(text);
   }
+  */
 
   initLocale() {
     if (this.props.locale === null || moment.locales().indexOf(this.props.locale) === -1) {
@@ -180,20 +208,27 @@ class GiftedChat extends React.Component {
     return this._isMounted;
   }
 
-  scrollToBottom(animated = true) {
-    if (this._messageContainerRef === null) {
-      return;
+  scrollToBottom = (animated = true) => {
+    if (this._messageContainerRef && this._messageContainerRef.current) {
+      const { inverted } = this.props;
+      if (inverted) {
+        this._messageContainerRef.current.scrollToBottom({ animated });
+      } else {
+        this._messageContainerRef.current.scrollToOffset({
+          offset: 0,
+          animated,
+        });
+      }
     }
-    /*
-    this._messageContainerRef.scrollTo({
-      y: 0,
-      animated,
-    });
-    */
-
-    this._messageContainerRef.scrollToBottom();
   }
 
+  handleOnScroll = (node) => {
+    const { onScroll } = this.props;
+
+    if (onScroll) {
+      onScroll(node);
+    }
+  }
 
   renderMessages() {
     return (
@@ -206,7 +241,9 @@ class GiftedChat extends React.Component {
           {...this.props}
           invertibleScrollViewProps={this.invertibleScrollViewProps}
           messages={this.getMessages()}
-          ref={component => this._messageContainerRef = component}
+          ref={this._messageContainerRef}
+          onScroll={this.handleOnScroll}
+          //ref={component => this._messageContainerRef = component}
         />
         {this.renderChatFooter()}
       </div>
@@ -368,6 +405,7 @@ GiftedChat.defaultProps = {
   messageIdGenerator: () => uuid.v4(),
   user: {},
   onSend: () => { },
+  onScroll: () => {},
   locale: null,
   timeFormat: TIME_FORMAT,
   dateFormat: DATE_FORMAT,
@@ -424,6 +462,7 @@ GiftedChat.propTypes = {
   messageIdGenerator: PropTypes.func,
   user: PropTypes.object,
   onSend: PropTypes.func,
+  onScroll: PropTypes.func,
   locale: PropTypes.string,
   timeFormat: PropTypes.string,
   dateFormat: PropTypes.string,

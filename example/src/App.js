@@ -13,7 +13,7 @@ for (let i = 0; i < 30; i++) {
   messages.push(generateMessage(loremIpsum.substring(0,(Math.random() * 100000)%loremIpsum.length), i))
 }
 
-
+const LOAD_EARLIER_ON_SCROLL_HEGHT_OFFSET = 100;
 
 function generateMessage(text, index, additionalData) {
   return {
@@ -32,7 +32,9 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-      messages: messages
+      messages: messages,
+      loadEarlier: true,
+      isLoadingEarlier: false,
     }
     this.onSend = this.onSend.bind(this)
   }
@@ -47,15 +49,21 @@ class App extends Component {
     }
   }
 
-  isCloseToTop({ layoutMeasurement, contentOffset, contentSize }) {
-    console.log("isCloseToTop")
-    
-    const paddingToTop = 80;
-    return contentSize.height - layoutMeasurement.height - paddingToTop <= contentOffset.y;
+  handleOnScroll = (node) => {
+    if (node.scrollTop < 100) {
+      this.loadMoreMessage();
+    }
   }
 
   loadMoreMessage() {
     console.log("loadmore message")
+
+    this.setState({isLoadingEarlier: true})
+
+    setTimeout(() => {
+
+      this.setState({isLoadingEarlier: false})
+    }, 7000)
   }
 
   renderInputToolbar = (props) => {
@@ -77,10 +85,9 @@ class App extends Component {
             messages={this.state.messages}
             renderInputToolbar={this.renderInputToolbar} 
             showScrollBottom={true}
-            listViewProps={{
-              scrollEventThrottle: 400,
-              onScroll: ({ nativeEvent }) => { if (this.isCloseToTop(nativeEvent)) this.loadMoreMessage(); }
-            }}
+            loadEarlier={this.state.loadEarlier}
+            isLoadingEarlier={this.state.isLoadingEarlier}
+            onScroll={this.handleOnScroll}
             onSend={this.onSend}/>
           </div>
         <div style={styles.converationDetails}>

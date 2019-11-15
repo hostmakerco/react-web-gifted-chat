@@ -24,9 +24,6 @@ export default class LoadEarlier extends React.Component {
     }
     return (
       <View>
-        <Text style={[styles.text, this.props.textStyle, { opacity: 0 }]}>
-          {this.props.label}
-        </Text>
         <ActivityIndicator
           color="white"
           size="small"
@@ -37,20 +34,19 @@ export default class LoadEarlier extends React.Component {
   }
   render() {
     return (
-      <TouchableOpacity
+      <View
         style={[styles.container, this.props.containerStyle]}
-        onPress={() => {
+        onClick={() => {
           if (this.props.onLoadEarlier) {
             this.props.onLoadEarlier();
           }
         }}
-        disabled={this.props.isLoadingEarlier === true}
-        accessibilityTraits="button"
+        //disabled={this.props.isLoadingEarlier === true}
       >
         <View style={[styles.wrapper, this.props.wrapperStyle]}>
           {this.renderLoading()}
         </View>
-      </TouchableOpacity>
+      </View>
     );
   }
 

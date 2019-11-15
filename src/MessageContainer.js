@@ -21,7 +21,7 @@ import TouchableOpacity from './TouchableOpacity';
 export default class MessageContainer extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.flatListRef = React.createRef();
+    this.scrollViewRef = React.createRef();
   }
 
   state = {
@@ -60,32 +60,48 @@ export default class MessageContainer extends React.PureComponent {
     return null;
   };
 
-  scrollTo(options) {
-    // this._invertibleScrollViewRef.scrollTo(options);
+  scrollToOffset(options) {
+    if (this.scrollViewRef && this.scrollViewRef.current && options) {
+      this.scrollViewRef.current.scrollToOffset(options);
+    }
+  }
 
-    if (this.flatListRef === null) {
-      return;
+  scrollToBottom = (animated = true) => {
+    const { inverted } = this.props;
+    if (!inverted) {
+      this.scrollTo({ offset: 0, animated });
+    } else {
+      if (this.scrollViewRef && this.scrollViewRef.current) {
+        this.scrollViewRef.current.scrollToEnd({ animated });
+      }
+    }
+  }
+
+  handleOnScroll = (node) => {
+    const { scrollToBottomOffset, onScroll } = this.props
+
+    if (onScroll) {
+      onScroll(node);
     }
 
-    this.flatListRef.scrollTo(options);
-  }
+    const contentOffsetY = node.scrollHeight - node.scrollTop - node.clientHeight; 
 
-  showScrollToBottom = () => {
-    this.setState({ showScrollBottom: true });
-  }
-
-  hideScrollToBottom = () => {
-    this.setState({ showScrollBottom: false });
-  }
-
-  scrollToBottom = () => {
-    //this.scrollTo({ offset: 0, animated: 'true' });
-
-    if (this.flatListRef === null) {
-      return;
+    if (this.props.inverted) {
+      if (contentOffsetY > scrollToBottomOffset) {
+        this.setState({ showScrollBottom: true })
+      } else {
+        this.setState({ showScrollBottom: false })
+      }
+    } else {
+      if (
+        contentOffsetY < scrollToBottomOffset &&
+        contentSizeHeight - layoutMeasurementHeight > scrollToBottomOffset
+      ) {
+        this.setState({ showScrollBottom: true })
+      } else {
+        this.setState({ showScrollBottom: false })
+      }
     }
-
-    this.flatListRef.scrollToBottom();
   }
 
   renderRow = ({ item, index }) => {
@@ -155,7 +171,8 @@ export default class MessageContainer extends React.PureComponent {
       >
         {this.state.showScrollBottom && this.props.showScrollBottom ? this.renderScrollToBottomWrapper() : null}
         <WebScrollView
-          ref={component => this.flatListRef = component}
+          //ref={component => this.flatListRef = component}
+          ref={this.scrollViewRef}
           keyExtractor={this.keyExtractor}
           extraData={this.props.extraData}
           enableEmptySections
@@ -167,8 +184,8 @@ export default class MessageContainer extends React.PureComponent {
           renderItem={this.renderRow}
           ListFooterComponent={this.renderHeaderWrapper}
           ListHeaderComponent={this.renderFooter}
-          showScrollToBottom={this.showScrollToBottom}
-          hideScrollToBottom={this.hideScrollToBottom}
+          onScroll={this.handleOnScroll}
+          //{...this.props.listViewProps}
         />
       </View>
     );
@@ -215,6 +232,7 @@ MessageContainer.defaultProps = {
   renderFooter: null,
   renderMessage: null,
   onLoadEarlier: () => {},
+  onScroll: () => {},
   inverted: true,
   loadEarlier: false,
   listViewProps: {},
@@ -223,6 +241,7 @@ MessageContainer.defaultProps = {
   showScrollBottom: false,
   scrollToBottom: false,
   scrollToBottomOffset: 200,
+  forwardRef: null,
 };
 
 MessageContainer.propTypes = {
@@ -232,6 +251,7 @@ MessageContainer.propTypes = {
   renderMessage: PropTypes.func,
   renderLoadEarlier: PropTypes.func,
   onLoadEarlier: PropTypes.func,
+  onScroll: PropTypes.func,
   listViewProps: PropTypes.object,
   inverted: PropTypes.bool,
   loadEarlier: PropTypes.bool,
@@ -241,4 +261,8 @@ MessageContainer.propTypes = {
   scrollToBottom: PropTypes.bool,
   scrollToBottomOffset: PropTypes.number,
   scrollToBottomComponent: PropTypes.func,
+  forwardRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.any }),
+  ]),
 };

@@ -1,45 +1,41 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { FlatList, View, StyleSheet, Keyboard, TouchableOpacity, Text } from 'react-native';
+import { ScrollView, View, StyleSheet, Keyboard, TouchableOpacity, Text } from 'react-native';
 
 export default class WebScrollView extends Component {
   constructor(props) {
     super(props);
     this.innerContainer = React.createRef();
     this.outerContainer = React.createRef();
-    this.requesting = false;
 
     this.handleScroll = this.handleScroll.bind(this);
   }
 
   handleScroll() {
-    const { showScrollToBottom, hideScrollToBottom } = this.props;
+    const { onScroll } = this.props;
 
     const node = this.outerContainer.current;
 
-    if (!this.requesting && node.scrollTop < 100) {
-      console.log("request now")
-      //this.requesting = true;
-    }
-
-    if ((node.scrollHeight - node.scrollTop - node.clientHeight) > 300) {
-      if (showScrollToBottom) {
-        showScrollToBottom();
-      }
-    } else {
-      if (hideScrollToBottom) {
-        hideScrollToBottom();
-      }
+    if (onScroll) {
+      onScroll(node);
     }
   }
 
-  scrollToBottom() {
-    this.innerContainer.current.scrollIntoView(false);
+  scrollToOffset(options) {
+    console.log('Not implemented');
+
+    /*
+    if (this.innerContainer && this.innerContainer.current && options) {
+      this.innerContainer.current.scrollToOffset(options);
+    }
+    */
   }
 
-  scrollTo(options) {
-    this.outerContainer.current.scrollTo({ offset: 0, animated: 'true' });
+  scrollToEnd = (animated = true) => {
+    if (this.innerContainer && this.innerContainer.current) {
+      this.innerContainer.current.scrollIntoView(false);
+    }
   }
 
   renderItem =(item, index) => {
@@ -84,8 +80,7 @@ const styles = {
 WebScrollView.defaultProps = {
   data: [],
   extraData: {},
-  showScrollToBottom: () => {},
-  hideScrollToBottom: () => {},
+  onScroll: () => {},
   ListHeaderComponent: () => {},
   ListFooterComponent: () => {},
   inverted: false,
@@ -101,8 +96,7 @@ WebScrollView.propTypes = {
   automaticallyAdjustContentInsets: PropTypes.bool,
   contentContainerStyle: PropTypes.object,
   renderItem: PropTypes.func,
-  showScrollToBottom: PropTypes.func,
-  hideScrollToBottom: PropTypes.func,
+  onScroll: PropTypes.func,
   ListHeaderComponent: PropTypes.func,
   ListFooterComponent: PropTypes.func,
 };
